@@ -2,10 +2,34 @@ import asyncHandler from "express-async-handler";
 import generateToken from "../db/generateToken.js";
 import User from "../models/UserModel.js";
 
-export const Login = (req, res, next) => {
+export const Login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
-  res.send({ message: { email: email, password: password } });
-};
+  if (!email || !password) {
+    return res.status(400).json({
+      message: "Email and password are required",
+    });
+  }
+
+  try {
+    const userInfo = await User.findOne({ email });
+    if (!userInfo) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }else if(userInfo && (await User.matchPassword(password))){
+      return res.status(200).json({
+        message:"User Login Successfully"
+      })
+    }
+    
+  } catch (error) {
+    return res.status(500).json({
+      error: error,
+    });
+    
+  }
+
+});
 
 export const Signup = asyncHandler(async (req, res, next) => {
   const { name, email, password, pic } = req.body;
@@ -21,12 +45,13 @@ export const Signup = asyncHandler(async (req, res, next) => {
       throw new Error("User Already exists");
     }
 
-    const user = User.create({
+    const user = await User.create({
       name,
       email,
       password,
       pic,
     });
+    console.log("user", user);
 
     if (user) {
       res.status(201).json({
