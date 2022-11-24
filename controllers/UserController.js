@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import generateToken from "../db/generateToken.js";
 import User from "../models/UserModel.js";
+import bcrypt from 'bcryptjs';
 
 export const Login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -16,10 +17,18 @@ export const Login = asyncHandler(async (req, res, next) => {
       return res.status(404).json({
         message: "User not found",
       });
-    }else if(userInfo && (await User.matchPassword(password))){
-      return res.status(200).json({
-        message:"User Login Successfully"
-      })
+    }else if(userInfo){
+      const compare = await bcrypt.compare(password,userInfo.password)
+      if(compare){
+        return res.status(200).json({
+          message:"User Login Successfully",
+          data:userInfo
+        })
+      }else{
+        return res.status(400).json({
+          message:"Email or password do not match",
+        })
+      }
     }
     
   } catch (error) {
@@ -45,13 +54,15 @@ export const Signup = asyncHandler(async (req, res, next) => {
       throw new Error("User Already exists");
     }
 
+    const salt = await bcrypt.genSalt(10)
+    const hash = await bcrypt.hash(password, salt)
+
     const user = await User.create({
       name,
       email,
-      password,
+      password:hash,
       pic,
     });
-    console.log("user", user);
 
     if (user) {
       res.status(201).json({
