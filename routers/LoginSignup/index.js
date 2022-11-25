@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { Login, Signup } from "../../controllers/UserController.js";
+import { Login, Signup, AllUsers } from "../../controllers/Authorization.js";
 
-const Userrouter = new Router();
+const AuthorizationRoute = new Router();
 
-Userrouter.post("/login", Login);
-Userrouter.post("/signup", Signup);
+AuthorizationRoute.get('/',AllUsers);
+AuthorizationRoute.post("/login", Login);
+AuthorizationRoute.post("/signup", Signup);
 
-export default Userrouter;
+export default AuthorizationRoute;
