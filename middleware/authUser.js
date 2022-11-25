@@ -3,7 +3,6 @@ import asyncHandler from "express-async-handler";
 import User from "../models/UserModel.js";
 
 const authUserVerification = asyncHandler(async (req, res, next) => {
-  console.log(req.headers);
   let token;
   if (
     req.headers.authorization &&
@@ -13,7 +12,6 @@ const authUserVerification = asyncHandler(async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
 
       const decode = jwt.verify(token, process.env.SECRET);
-      console.log("decode", decode);
       req.user = await User.findById(decode.id).select("-password");
       next();
     } catch (error) {
