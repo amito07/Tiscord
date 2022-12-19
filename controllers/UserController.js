@@ -14,5 +14,5 @@ export const AllUsers = asyncHandler(async (req, res, next) => {
 
   const users = await User.find(searchValue).find({_id: {$ne: userInfo.id}});
   console.log(users);
-  res.send({searchUser:users,requesteduser:userInfo});
+  res.send({searchUser:userInfo,requesteduser:users});
 });
